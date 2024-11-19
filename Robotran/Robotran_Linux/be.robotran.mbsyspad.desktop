@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Name=MBsysPad
+Comment=Starts MBsysPad, the graphical editor of Robotran
+Type=Application
+Exec=/path_to_mbsyspad/MBsysPad/start_MBsysPad.sh %f
+Icon=/path_to_mbsyspad/MBsysPad/IconePad.svg
+Terminal=false
+Categories=Science;NumericalAnalysis;Physics;Robotics;Spirituality
