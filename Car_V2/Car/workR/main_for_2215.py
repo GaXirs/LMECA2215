@@ -21,6 +21,7 @@ sys.path.insert(1, "../userfctR")
 import numpy as np
 
 # %% Project loading
+# Before executing : verify if your terminal is in the folder workR
 mbs_data = robotran.MbsData("../dataR/Car.mbs",
                             user_path="userfctR",
                             symbolic_path="symbolicR"
