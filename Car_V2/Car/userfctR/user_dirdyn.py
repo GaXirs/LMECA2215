@@ -19,7 +19,8 @@ def user_dirdyn_init(mbs_data, mbs_dirdyn):
     None.
 
     """
-    mbs_data.define_output_vector("test",20)
+    mbs_data.define_output_vector("force_wheel",20)
+    mbs_data.define_output_vector("anglis",8)
 
     return
 
@@ -44,7 +45,8 @@ def user_dirdyn_loop(mbs_data, mbs_dirdyn):
     sec, rest = divmod(mbs_data.tsim, 1)
     if abs(rest - 1e-3) < 1e-10 and sec > 0:
         print('Simulation: {:.0f} / {:.0f} sec.'.format(sec, mbs_dirdyn.get_options('tf')))
-    mbs_data.set_output_vector(mbs_data.vector,"test")
+    mbs_data.set_output_vector(mbs_data.vector,"force_wheel")
+    mbs_data.set_output_vector(mbs_data.vector2,"anglis")
     return
 
 

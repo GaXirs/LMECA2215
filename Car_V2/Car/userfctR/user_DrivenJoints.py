@@ -23,7 +23,7 @@ def user_DrivenJoints(mbs_data, tsim):
     """
     
     if mbs_data.process == 2:  # dynamics 
-        rack_disp = 0.012 #0.009 # Rack lateral displacement parameter
+        rack_disp = 0.009 #0.009 # Rack lateral displacement parameter
         tstart = 1.2 # 1.2
         tstop = 2.2 # 2.2
 

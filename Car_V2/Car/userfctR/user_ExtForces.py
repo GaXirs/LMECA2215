@@ -9,6 +9,7 @@ from tgc_car_kine_wheel import tgc_car_kine_wheel
 from tgc_bakker_contact import tgc_bakker_contact
 
 table_force = np.zeros(20)
+table_anglis = np.zeros(8)
 
 def user_ExtForces(PxF, RxF, VxF, OMxF, AxF, OMPxF, mbs_data, tsim, ixF):
     """Compute an user-specified external force.
@@ -92,8 +93,10 @@ def user_ExtForces(PxF, RxF, VxF, OMxF, AxF, OMPxF, mbs_data, tsim, ixF):
         table_force[ind*5+2] = Flat
         table_force[ind*5+3] = Frad
         table_force[ind*5+4] = Mz
-
+        table_anglis[ind*2+0] = ixF
+        table_anglis[ind*2+1] = anglis
         mbs_data.vector = table_force
+        mbs_data.vector2 = table_anglis
         # expressed in inertial frame
         Fwhl_I = np.zeros(4)
         Mwhl_I = np.zeros(4)
