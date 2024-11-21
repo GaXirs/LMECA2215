@@ -21,7 +21,6 @@ sys.path.insert(1, "../userfctR")
 import numpy as np
 
 # %% Project loading
-# Before executing : verify if your terminal is in the folder workR
 mbs_data = robotran.MbsData("../dataR/Car.mbs",
                             user_path="userfctR",
                             symbolic_path="symbolicR"
@@ -54,9 +53,11 @@ mbs_data.set_qdriven(mbs_data.joint_id["R2_wheel_rr_rt"])
 mbs_data.set_qdriven(mbs_data.joint_id["R2_wheel_rr_lt"])
 
 
-# Velocity in m/s
-V = 5.0
 
+# Parameters ---------------------------------------------
+V = 1.0                                                       # Velocity in m/s
+mbs_data.user_model["EquilQuantities"]["Qpropulsion"] = 450   # Torque
+#---------------------------------------------------------
 # Equilibrium module
 mbs_data.process = 1 # Equilibrium or modal analysis
 mbs_equil = robotran.MbsEquil(mbs_data)

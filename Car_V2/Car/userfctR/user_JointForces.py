@@ -27,8 +27,8 @@ def user_JointForces(mbs_data, tsim):
     None
     """
     # Example with propulsion torque on both rear wheels (the rotation of the wheel must be an independant variable)
-    # mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_lt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
-    # mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_rt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
+    mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_lt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
+    mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_rt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
 
     # # Force on the direction rack
     # mbs_data.Qq[mbs_data.joint_id["T2_rack"]] = mbs_data.user_model["EquilQuantities"]["Qrack"]
