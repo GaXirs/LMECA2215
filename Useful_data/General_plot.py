@@ -141,6 +141,9 @@ import numpy as np
 # Get the current working directory (where the script is located)
 parent_dir = os.getcwd()
 
+
+plot_1 = 0
+plot_2 = 0
 # Initialize dictionaries to hold dataframes
 data_q = {}
 data_qd = {}
@@ -177,71 +180,72 @@ for folder in ["0", "1", "2", "3"]:
                 f"{wheel_id}_{force}" for wheel_id in [2, 1, 3, 4] for force in ["Id","Flong", "Flat", "Frad", "Mz"]
             ]
             data_force[int(folder)] = df_force
-
-# Plot (x, y)
-plt.figure(figsize=(10, 8))
-for folder, df in data_q.items():
-    plt.plot(-df["y"], df["x"], label=f'Folder {folder}')
-plt.title('(x, y) Plot')
-plt.xlabel('y')
-plt.ylabel('x')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-# Plot (x, t)
-plt.figure(figsize=(10, 8))
-for folder, df in data_q.items():
-    plt.plot(df["t"], df["x"], label=f'Folder {folder}')
-plt.title('(x, t) Plot')
-plt.xlabel('Time (t)')
-plt.ylabel('x')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-# Plot (y, t)
-plt.figure(figsize=(10, 8))
-for folder, df in data_q.items():
-    plt.plot(df["t"], df["y"], label=f'Folder {folder}')
-plt.title('(y, t) Plot')
-plt.xlabel('Time (t)')
-plt.ylabel('y')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-# Plot Absolute Speed vs. Time
-plt.figure(figsize=(10, 8))
-for folder, df in data_qd.items():
-    plt.plot(df["t"], df["speed"], label=f'Folder {folder}')
-plt.title('Absolute Speed vs. Time')
-plt.xlabel('Time (t)')
-plt.ylabel('Speed (m/s)')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-# Plot Forces for Wheels
-force_types = ["Flong", "Flat", "Frad", "Mz"]
-for force_type in force_types:
-    fig, axs = plt.subplots(2, 2, figsize=(12, 10))
-    fig.suptitle(f'{force_type} for All Wheels', fontsize=16)
-
-    for folder, df in data_force.items():
-        t = df["t"]
-        for i, wheel_id in enumerate([2, 1, 3, 4]):
-            force_col = f"{wheel_id}_{force_type}"
-            row, col = divmod(i, 2)
-            axs[row, col].plot(t, df[force_col], label=f'Folder {folder}')
-            axs[row, col].set_title(f'Wheel ID={wheel_id}')
-            axs[row, col].set_xlabel('Time (t)')
-            axs[row, col].set_ylabel(force_type)
-            axs[row, col].legend()
-            axs[row, col].grid(True)
-
-    plt.tight_layout(rect=[0, 0, 1, 0.95])
+if ( plot_1 ):
+    # Plot (x, y)
+    plt.figure(figsize=(10, 8))
+    for folder, df in data_q.items():
+        plt.plot(-df["y"], df["x"], label=f'Folder {folder}')
+    plt.title('(x, y) Plot')
+    plt.xlabel('y')
+    plt.ylabel('x')
+    plt.legend()
+    plt.grid(True)
     plt.show()
+
+    # Plot (x, t)
+    plt.figure(figsize=(10, 8))
+    for folder, df in data_q.items():
+        plt.plot(df["t"], df["x"], label=f'Folder {folder}')
+    plt.title('(x, t) Plot')
+    plt.xlabel('Time (t)')
+    plt.ylabel('x')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    # Plot (y, t)
+    plt.figure(figsize=(10, 8))
+    for folder, df in data_q.items():
+        plt.plot(df["t"], df["y"], label=f'Folder {folder}')
+    plt.title('(y, t) Plot')
+    plt.xlabel('Time (t)')
+    plt.ylabel('y')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    # Plot Absolute Speed vs. Time
+    plt.figure(figsize=(10, 8))
+    for folder, df in data_qd.items():
+        plt.plot(df["t"], df["speed"], label=f'Folder {folder}')
+    plt.title('Absolute Speed vs. Time')
+    plt.xlabel('Time (t)')
+    plt.ylabel('Speed (m/s)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+if(plot_2):
+    # Plot Forces for Wheels
+    force_types = ["Flong", "Flat", "Frad", "Mz"]
+    for force_type in force_types:
+        fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+        fig.suptitle(f'{force_type} for All Wheels', fontsize=16)
+
+        for folder, df in data_force.items():
+            t = df["t"]
+            for i, wheel_id in enumerate([2, 1, 3, 4]):
+                force_col = f"{wheel_id}_{force_type}"
+                row, col = divmod(i, 2)
+                axs[row, col].plot(t, df[force_col], label=f'Folder {folder}')
+                axs[row, col].set_title(f'Wheel ID={wheel_id}')
+                axs[row, col].set_xlabel('Time (t)')
+                axs[row, col].set_ylabel(force_type)
+                axs[row, col].legend()
+                axs[row, col].grid(True)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
+        plt.show()
 
 
     
@@ -256,7 +260,8 @@ for force_type in force_types:
         # Merge with speed data from df_qd using the "t" column
         df_qd_speed = data_qd[folder]
         merged_df = pd.merge(df, df_qd_speed, on="t", how="left")
-        #merged_df = merged_df[merged_df["t"] >= 2.2]
+        first_index_above_x = merged_df[merged_df['t'] > 2.2].index[0] if not df[df['t'] > 2.2].empty else None
+        merged_df = merged_df.iloc[first_index_above_x :].reset_index(drop=True)
         
         # Detect when the speed starts decreasing
         speed = merged_df["speed"]
