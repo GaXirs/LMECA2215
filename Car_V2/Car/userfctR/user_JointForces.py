@@ -27,9 +27,23 @@ def user_JointForces(mbs_data, tsim):
     None
     """
     # Example with propulsion torque on both rear wheels (the rotation of the wheel must be an independant variable)
-    mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_lt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
-    mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_rt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
+    #mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_lt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
+    #mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_rt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
 
+    if( mbs_data.transmission == 0  and  tsim > mbs_data.tstop ): 
+        mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_lt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
+        mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_rt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
+    else :
+        mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_lt"]] = 0
+        mbs_data.Qq[mbs_data.joint_id["R2_wheel_rr_rt"]] = 0
+    
+    if( mbs_data.transmission == 1  and  tsim > mbs_data.tstop ): 
+        mbs_data.Qq[mbs_data.joint_id["R2_wheel_ft_lt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
+        mbs_data.Qq[mbs_data.joint_id["R2_wheel_ft_rt"]] = mbs_data.user_model["EquilQuantities"]["Qpropulsion"]
+    else :
+        mbs_data.Qq[mbs_data.joint_id["R2_wheel_ft_lt"]] = 0
+        mbs_data.Qq[mbs_data.joint_id["R2_wheel_ft_rt"]] = 0    
+    
     # # Force on the direction rack
     # mbs_data.Qq[mbs_data.joint_id["T2_rack"]] = mbs_data.user_model["EquilQuantities"]["Qrack"]
 

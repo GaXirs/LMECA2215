@@ -56,7 +56,10 @@ mbs_data.set_qdriven(mbs_data.joint_id["R2_wheel_rr_lt"])
 
 # Parameters ---------------------------------------------
 V = 5.0                                                         # Velocity in m/s
-mbs_data.user_model["EquilQuantities"]["Qpropulsion"] = 600     # Torque
+mbs_data.user_model["EquilQuantities"]["Qpropulsion"] = 600     # Torque  /!\ attention compte double /!\
+mbs_data.transmission = 0                                       # 0 propulsion ; 1 traction
+mbs_data.tstart = 1.2
+mbs_data.tstop = 2.2
 #---------------------------------------------------------
 # Equilibrium module
 mbs_data.process = 1 # Equilibrium or modal analysis

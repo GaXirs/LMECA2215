@@ -24,8 +24,8 @@ def user_DrivenJoints(mbs_data, tsim):
     
     if mbs_data.process == 2:  # dynamics 
         rack_disp = 0.009 #0.009 # Rack lateral displacement parameter
-        tstart = 1.2 # 1.2
-        tstop = 2.2 # 2.2
+        tstart = mbs_data.tstart # 1.2
+        tstop = mbs_data.tstop # 2.2
 
         if (tsim<tstart):
             mbs_data.q[mbs_data.joint_id["T2_rack"]] = 0
