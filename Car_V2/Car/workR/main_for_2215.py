@@ -56,10 +56,11 @@ mbs_data.set_qdriven(mbs_data.joint_id["R2_wheel_rr_lt"])
 
 # Parameters ---------------------------------------------
 V = 5.0                                                         # Velocity in m/s
-mbs_data.user_model["EquilQuantities"]["Qpropulsion"] = 600     # Torque  /!\ attention compte double /!\
-mbs_data.transmission = 0                                       # 0 propulsion ; 1 traction
+mbs_data.user_model["EquilQuantities"]["Qpropulsion"] = 200     # Torque  /!\ attention compte double /!\
+mbs_data.transmission = 1                                       # 0 propulsion ; 1 traction
 mbs_data.tstart = 1.2
 mbs_data.tstop = 2.2
+mbs_data.simu_time = 2.2 + (10-2.2)*4
 #---------------------------------------------------------
 # Equilibrium module
 mbs_data.process = 1 # Equilibrium or modal analysis
@@ -145,7 +146,7 @@ mbs_data.set_qdriven(mbs_data.joint_id["T2_rack"])
 
 # Setting Dirdyn module (see Robotran webpage for more options)
 mbs_dirdyn = robotran.MbsDirdyn(mbs_data)
-mbs_dirdyn.set_options(tf=10,  # Default : 5.0
+mbs_dirdyn.set_options(tf= mbs_data.simu_time,  # Default : 5.0
                        resfilename="python_dirdyn",
                        save2file=1,
                        integrator="RK4", # Other integrator: "RK4", "Dopri5"

@@ -142,11 +142,11 @@ import numpy as np
 parent_dir = os.getcwd()
 
 
-plot_1 = 0
+plot_1 = 1
 plot_2 = 0
 plot_3 = 0
-plot_4 = 1
-plot_5 = 1
+plot_4 = 0
+plot_5 = 0
 # Initialize dictionaries to hold dataframes
 data_q = {}
 data_qd = {}
@@ -154,7 +154,7 @@ data_force = {}
 data_anglis = {}
 
 # Iterate through folder numbers
-for folder in ["0", "1", "2", "3"]:
+for folder in ["20", "21", "22", "23", "24", "25", "14"]:
     folder_path = os.path.join(parent_dir, folder)
     if os.path.isdir(folder_path):  # Ensure it's a valid folder
         # Process python_dirdyn_q.res
@@ -164,7 +164,7 @@ for folder in ["0", "1", "2", "3"]:
             df_q = df_q.iloc[:, :3] 
             df_q.columns = ["t", "x", "y"]
             data_q[int(folder)] = df_q
-            print(df_q["x"])
+            #print(df_q["x"])
             
 
         # Process python_dirdyn_qd.res
