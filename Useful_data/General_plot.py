@@ -137,14 +137,15 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.colors as mcolors
 
 # Get the current working directory (where the script is located)
 parent_dir = os.getcwd()
 
 
-plot_1 = 1
+plot_1 = 0
 plot_2 = 0
-plot_3 = 0
+plot_3 = 3
 plot_4 = 0
 plot_5 = 0
 # Initialize dictionaries to hold dataframes
@@ -154,7 +155,7 @@ data_force = {}
 data_anglis = {}
 
 # Iterate through folder numbers
-for folder in ["20", "21", "22", "23", "24", "25", "14"]:
+for folder in ["20", "21", "22", "23", "24", "25", "14","11","12","10","13"]:
     folder_path = os.path.join(parent_dir, folder)
     if os.path.isdir(folder_path):  # Ensure it's a valid folder
         # Process python_dirdyn_q.res
@@ -195,49 +196,80 @@ for folder in ["20", "21", "22", "23", "24", "25", "14"]:
             data_force[int(folder)] = df_force
             
             
+            
 if ( plot_1 ):
     # Plot (x, y)
     plt.figure(figsize=(10, 8))
+    plt.rcParams.update({'font.size' : 14})
     for folder, df in data_q.items():
-        plt.plot(-df["y"], df["x"], label=f'Folder {folder}')
-    plt.title('(x, y) Plot')
-    plt.xlabel('y')
-    plt.ylabel('x')
-    plt.legend()
+        limited_t_df = df[df['t'] <= 15]
+        color = "red"
+        if( int(folder) < 20) :
+            color = "blue"
+        if (int( folder) != 10 and int(folder) != 20):
+            plt.plot(-limited_t_df["y"], limited_t_df["x"],color = color ,label=f'Folder {folder}')
+    plt.text(50, 30, "100 [Nm]", fontsize=12, color='black')
+    plt.text(80, 15, "200 [Nm]", fontsize=12, color='black')
+    plt.text(130, -5, "400 [Nm]", fontsize=12, color='black')
+    plt.text(70, 60, "600 [Nm]", fontsize=12, color='black')
+    plt.xlabel('y [m]', fontsize = 15)
+    plt.ylabel('x [m]', fontsize = 15)
     plt.grid(True)
+    plt.savefig("x_y")
     plt.show()
 
     # Plot (x, t)
     plt.figure(figsize=(10, 8))
     for folder, df in data_q.items():
-        plt.plot(df["t"], df["x"], label=f'Folder {folder}')
+        lim_t_df = df[df['t'] <= 15]
+        color = "red"
+        if( int(folder) < 20) :
+            color = "blue"
+        plt.plot(lim_t_df["t"], lim_t_df["x"],color = color, label=f'Folder {folder}')
     plt.title('(x, t) Plot')
     plt.xlabel('Time (t)')
     plt.ylabel('x')
     plt.legend()
     plt.grid(True)
+    plt.savefig("x_t")
     plt.show()
 
     # Plot (y, t)
     plt.figure(figsize=(10, 8))
     for folder, df in data_q.items():
-        plt.plot(df["t"], df["y"], label=f'Folder {folder}')
+        limi_t_df = df[df['t'] <= 15]
+        color = "red"
+        if( int(folder) < 20) :
+            color = "blue"
+        plt.plot(limi_t_df["t"], limi_t_df["y"], color = color,label=f'Folder {folder}')
     plt.title('(y, t) Plot')
     plt.xlabel('Time (t)')
     plt.ylabel('y')
     plt.legend()
     plt.grid(True)
+    plt.savefig("y_t")
     plt.show()
 
     # Plot Absolute Speed vs. Time
     plt.figure(figsize=(10, 8))
+    plt.rcParams.update({'font.size' : 14})
     for folder, df in data_qd.items():
-        plt.plot(df["t"], df["speed"], label=f'Folder {folder}')
-    plt.title('Absolute Speed vs. Time')
-    plt.xlabel('Time (t)')
-    plt.ylabel('Speed (m/s)')
-    plt.legend()
+        color = "red"
+        if( int(folder) < 20) :
+            color = "blue"
+        if (int(folder) == 10):
+            color = 'tab:cyan'
+        plt.plot(df["t"], df["speed"],color = color, label=f'Folder {folder}')
+    plt.xlabel('Time [s]', fontsize = 15)
+    plt.ylabel('Speed [m/s]', fontsize = 15)
+    plt.xlim(0,40)
+    plt.text(35, 10, "100 [Nm]", fontsize=12, color='black')
+    plt.text(28, 18, "200 [Nm]", fontsize=12, color='black')
+    plt.text(19, 25, "400 [Nm]", fontsize=12, color='black')
+    plt.text(13,27, "600 [Nm]", fontsize=12, color='black')
+    plt.text(2, 20, "800 [Nm]", fontsize=12, color='black')
     plt.grid(True)
+    plt.savefig("speed_time")
     plt.show()
 
 if(plot_2):
@@ -267,8 +299,9 @@ if( plot_3):
     force_types = ["Flong", "Flat", "Frad", "Mz"]
     for force_type in force_types:
         fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+        fig2, axs2 = plt.subplots(2, 2, figsize=(12, 10))
         fig.suptitle(f'{force_type} vs Speed for All Wheels (Speed Decreasing Discarded)', fontsize=16)
-
+        fig2.suptitle(f'{force_type} vs Speed for All Wheels essieu motoriser (top) essieu suiveur ( bottom)(Speed Decreasing Discarded)', fontsize=16)
         for folder, df in data_force.items():
             t = df["t"]
             # Merge with speed data from df_qd using the "t" column
@@ -288,12 +321,29 @@ if( plot_3):
             for i, wheel_id in enumerate([2, 1, 3, 4]):
                 force_col = f"{wheel_id}_{force_type}"
                 row, col = divmod(i, 2)
-                axs[row, col].plot(merged_df["speed"], merged_df[force_col], label=f'Folder {folder}')
+                color = "red"
+                if( int(folder) < 20) :
+                    color = "blue"
+                axs[row, col].plot(merged_df["speed"], merged_df[force_col],color = color ,label=f'Folder {folder}')
                 axs[row, col].set_title(f'Wheel ID={wheel_id}')
                 axs[row, col].set_xlabel('Speed (m/s)')
                 axs[row, col].set_ylabel(force_type)
                 axs[row, col].legend()
                 axs[row, col].grid(True)
+                
+            for i, wheel_id in enumerate([2, 1, 3, 4]):
+                force_col = f"{wheel_id}_{force_type}"
+                row, col = divmod(i, 2)
+                color = "red"
+                if( int(folder) < 20) :
+                    color = "blue"
+                    row ,col = divmod(i-2,2)
+                axs2[row, col].plot(merged_df["speed"], merged_df[force_col],color = color ,label=f'Folder {folder}')
+                axs2[row, col].set_title(f'Wheel ID={wheel_id}')
+                axs2[row, col].set_xlabel('Speed (m/s)')
+                axs2[row, col].set_ylabel(force_type)
+                axs2[row, col].legend()
+                axs2[row, col].grid(True)
 
         plt.tight_layout(rect=[0, 0, 1, 0.95])
         plt.show()
