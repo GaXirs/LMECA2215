@@ -155,7 +155,7 @@ data_force = {}
 data_anglis = {}
 
 # Iterate through folder numbers
-for folder in ["20", "21", "22", "23", "24", "25", "14","11","12","10","13"]:
+for folder in ["20", "21", "22", "23", "24","10","11","12","13","14"]:# ["20","24","14","10"]:
     folder_path = os.path.join(parent_dir, folder)
     if os.path.isdir(folder_path):  # Ensure it's a valid folder
         # Process python_dirdyn_q.res
@@ -290,25 +290,30 @@ if(plot_2):
                 axs[row, col].set_ylabel(force_type)
                 axs[row, col].legend()
                 axs[row, col].grid(True)
-
         plt.tight_layout(rect=[0, 0, 1, 0.95])
         plt.show()
 
-if( plot_3):    
+if plot_3:    
     # Plot Forces for Wheels as a function of Speed (with decreasing speed discarded)
     force_types = ["Flong", "Flat", "Frad", "Mz"]
+    # Define 5 red and 5 blue color variants
+    reds = ['#FF0000', '#FF4D00', '#FF8000', '#FFB300', '#FFCC00']  # Red to orange shades
+    blues = ['#0000FF', '#0066CC', '#33CC99', '#66CC66', '#99FF33']  # Blue to green shades
+
     for force_type in force_types:
         fig, axs = plt.subplots(2, 2, figsize=(12, 10))
         fig2, axs2 = plt.subplots(2, 2, figsize=(12, 10))
+        fig3, axs3 = plt.subplots(2, 2, figsize=(12, 10))
         fig.suptitle(f'{force_type} vs Speed for All Wheels (Speed Decreasing Discarded)', fontsize=16)
-        fig2.suptitle(f'{force_type} vs Speed for All Wheels essieu motoriser (top) essieu suiveur ( bottom)(Speed Decreasing Discarded)', fontsize=16)
+        fig2.suptitle(f'{force_type} vs Speed for All Wheels essieu motorisé (top) essieu suiveur (bottom) (Speed Decreasing Discarded)', fontsize=16)
+        fig3.suptitle('f_tot' ,fontsize = 16)
         for folder, df in data_force.items():
             t = df["t"]
             # Merge with speed data from df_qd using the "t" column
             df_qd_speed = data_qd[folder]
             merged_df = pd.merge(df, df_qd_speed, on="t", how="left")
             first_index_above_x = merged_df[merged_df['t'] > 2.2].index[0] if not df[df['t'] > 2.2].empty else None
-            merged_df = merged_df.iloc[first_index_above_x :].reset_index(drop=True)
+            merged_df = merged_df.iloc[first_index_above_x:].reset_index(drop=True)
             
             # Detect when the speed starts decreasing
             speed = merged_df["speed"]
@@ -321,32 +326,171 @@ if( plot_3):
             for i, wheel_id in enumerate([2, 1, 3, 4]):
                 force_col = f"{wheel_id}_{force_type}"
                 row, col = divmod(i, 2)
-                color = "red"
-                if( int(folder) < 20) :
-                    color = "blue"
-                axs[row, col].plot(merged_df["speed"], merged_df[force_col],color = color ,label=f'Folder {folder}')
+                color = reds[int(str(folder)[1])]
+                if int(folder) < 20:
+                    color = blues[int(str(folder)[1])]
+
+                # Tracer la courbe principale
+                axs[row, col].plot(merged_df["speed"], merged_df[force_col], color=color, label=f'Folder {folder}')
                 axs[row, col].set_title(f'Wheel ID={wheel_id}')
                 axs[row, col].set_xlabel('Speed (m/s)')
                 axs[row, col].set_ylabel(force_type)
                 axs[row, col].legend()
                 axs[row, col].grid(True)
-                
+
             for i, wheel_id in enumerate([2, 1, 3, 4]):
                 force_col = f"{wheel_id}_{force_type}"
                 row, col = divmod(i, 2)
-                color = "red"
-                if( int(folder) < 20) :
-                    color = "blue"
-                    row ,col = divmod(i-2,2)
-                axs2[row, col].plot(merged_df["speed"], merged_df[force_col],color = color ,label=f'Folder {folder}')
+                color = reds[int(str(folder)[1])]
+                if int(folder) < 20:
+                    color = blues[int(str(folder)[1])]
+                    row, col = divmod(i - 2, 2)
+
+                # Tracer la courbe principale
+                axs2[row, col].plot(merged_df["speed"], merged_df[force_col], color=color, label=f'Folder {folder}')
                 axs2[row, col].set_title(f'Wheel ID={wheel_id}')
                 axs2[row, col].set_xlabel('Speed (m/s)')
                 axs2[row, col].set_ylabel(force_type)
                 axs2[row, col].legend()
                 axs2[row, col].grid(True)
+                
+            for i, wheel_id in enumerate([2, 1, 3, 4]):
+                force_col = f"{wheel_id}_Flong"
+                force_col2 = f'{wheel_id}_Flat'
+                row, col = divmod(i, 2)
+                color = reds[int(str(folder)[1])]
+                if int(folder) < 20:
+                    color = blues[int(str(folder)[1])]
+                    row, col = divmod(i , 2)
+
+                # Tracer la courbe principale
+                axs3[row, col].plot(merged_df["speed"],np.sqrt( merged_df[force_col]*merged_df[force_col]+merged_df[force_col2]*merged_df[force_col2]), color=color, label=f'Folder {folder}')
+                axs3[row, col].set_title(f'Wheel ID={wheel_id}')
+                axs3[row, col].set_xlabel('Speed (m/s)')
+                axs3[row, col].set_ylabel(force_type)
+                axs3[row, col].legend()
+                axs3[row, col].grid(True)
 
         plt.tight_layout(rect=[0, 0, 1, 0.95])
         plt.show()
+
+"""
+if plot_3:    
+    # Plot Forces for Wheels as a function of Speed (with decreasing speed discarded)
+    force_types = ["Flong", "Flat", "Frad", "Mz"]
+    reds = ['#FF0000', '#FF6666', '#CC0000', '#990000']  # Different red shades
+    blues = ['#0000FF', '#6666FF', '#0033CC', '#0066CC']  # Different blue shades
+    temp_data = {}
+    for force_type in force_types:
+        fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+        fig2, axs2 = plt.subplots(2, 2, figsize=(12, 10))
+        fig.suptitle(f'{force_type} vs Speed for All Wheels (Speed Decreasing Discarded)', fontsize=16)
+        fig2.suptitle(f'{force_type} vs Speed for All Wheels essieu motorisé (top) essieu suiveur (bottom) (Speed Decreasing Discarded)', fontsize=16)
+        if( force_type == "Flong" ):
+            for folder, df in data_force.items():
+                t = df["t"]
+                # Merge with speed data from df_qd using the "t" column
+                df_qd_speed = data_qd[folder]
+                merged_df = pd.merge(df, df_qd_speed, on="t", how="left")
+                first_index_above_x = merged_df[merged_df['t'] > 2.2].index[0] if not df[df['t'] > 2.2].empty else None
+                merged_df = merged_df.iloc[first_index_above_x:].reset_index(drop=True)
+                
+                # Detect when the speed starts decreasing
+                speed = merged_df["speed"]
+                speed_derivative = speed.diff()  # First derivative of speed
+                first_decreasing_idx = speed_derivative[speed_derivative < 0].index.min()  # First index where speed decreases
+                
+                if not pd.isna(first_decreasing_idx):  # If a decrease is found
+                    merged_df = merged_df.iloc[:first_decreasing_idx]  # Discard data after speed starts decreasing
+
+                for i, wheel_id in enumerate([2, 1, 3, 4]):
+                    force_col = f"{wheel_id}_{force_type}"
+                    row, col = divmod(i, 2)
+                    color = "red"
+                    if int(folder) < 20:
+                        color = "blue"
+
+                    # Tracer la courbe principale
+                    axs[row, col].plot(merged_df["speed"], merged_df[force_col], color=color, label=f'Folder {folder}')
+                    axs[row, col].set_title(f'Wheel ID={wheel_id}')
+                    axs[row, col].set_xlabel('Speed (m/s)')
+                    axs[row, col].set_ylabel(force_type)
+                    axs[row, col].legend()
+                    axs[row, col].grid(True)
+
+                for i, wheel_id in enumerate([2, 1, 3, 4]):
+                    force_col = f"{wheel_id}_{force_type}"
+                    row, col = divmod(i, 2)
+                    color = "red"
+                    if int(folder) < 20:
+                        color = "blue"
+                        row, col = divmod(i - 2, 2)
+
+                    # Tracer la courbe principale
+                    axs2[row, col].plot(merged_df["speed"], merged_df[force_col], color=color, label=f'Folder {folder}')
+                    axs2[row, col].set_title(f'Wheel ID={wheel_id}')
+                    axs2[row, col].set_xlabel('Speed (m/s)')
+                    axs2[row, col].set_ylabel(force_type)
+                    axs2[row, col].legend()
+                    axs2[row, col].grid(True)
+        else:
+            
+            for folder, df in data_force.items():
+                t = df["t"]
+                # Merge with speed data from df_qd using the "t" column
+                df_qd_speed = data_qd[folder]
+                merged_df = pd.merge(df, df_qd_speed, on="t", how="left")
+                first_index_above_x = merged_df[merged_df['t'] > 2.2].index[0] if not df[df['t'] > 2.2].empty else None
+                merged_df = merged_df.iloc[first_index_above_x:].reset_index(drop=True)
+                
+                # Detect when the speed starts decreasing
+                speed = merged_df["speed"]
+                speed_derivative = speed.diff()  # First derivative of speed
+                first_decreasing_idx = speed_derivative[speed_derivative < 0].index.min()  # First index where speed decreases
+                temp_data[int(folder)] = merged_df.copy()
+                if not pd.isna(first_decreasing_idx):  # If a decrease is found
+                    merged_df = merged_df.iloc[:first_decreasing_idx]  # Discard data after speed starts decreasing
+
+                for i, wheel_id in enumerate([2, 1, 3, 4]):
+                    force_col = f"{wheel_id}_{force_type}"
+                    row, col = divmod(i, 2)
+                    color = "red"
+                    if int(folder) < 20:
+                        color = "blue"
+
+                    # Tracer la courbe principale
+                    axs[row, col].plot(merged_df["speed"], merged_df[force_col], color=color, label=f'Folder {folder}')
+                    axs[row, col].set_title(f'Wheel ID={wheel_id}')
+                    axs[row, col].set_xlabel('Speed (m/s)')
+                    axs[row, col].set_ylabel(force_type)
+                    axs[row, col].legend()
+                    axs[row, col].grid(True)
+
+                for i, wheel_id in enumerate([2, 1, 3, 4]):
+                    force_col = f"{wheel_id}_{force_type}"
+                    row, col = divmod(i, 2)
+                    color = "red"
+                    if int(folder) < 20:
+                        color = "blue"
+                        row, col = divmod(i - 2, 2)
+
+                    # Tracer la courbe principale
+                    axs2[row, col].plot(merged_df["speed"], merged_df[force_col], color=color, label=f'Folder {folder}')
+                    axs2[row, col].set_title(f'Wheel ID={wheel_id}')
+                    axs2[row, col].set_xlabel('Speed (m/s)')
+                    axs2[row, col].set_ylabel(force_type)
+                    axs2[row, col].legend()
+                    axs2[row, col].grid(True)
+                for i, wheel_id in enumerate([2, 1, 3, 4]):
+                    force_col = f"{wheel_id}_{force_type}"
+                    row, col = divmod(i, 2)
+                    #axs[row, col].fill_between(temp_data[20]['t'],temp_data[20][force_col],temp_data[22][force_col])
+        #print(temp_data[20])
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
+        plt.show()
+"""
+
+
              
 if(plot_4):    
     # Plot Forces for Wheels as a function of Speed (with decreasing speed discarded)
