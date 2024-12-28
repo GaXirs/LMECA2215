@@ -138,6 +138,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as mcolors
+from scipy.ndimage import gaussian_filter1d
 
 # Get the current working directory (where the script is located)
 parent_dir = os.getcwd()
@@ -145,8 +146,8 @@ parent_dir = os.getcwd()
 
 plot_1 = 0
 plot_2 = 0
-plot_3 = 3
-plot_4 = 0
+plot_3 = 0 #/!\  savefig 
+plot_4 = 1
 plot_5 = 0
 # Initialize dictionaries to hold dataframes
 data_q = {}
@@ -191,7 +192,7 @@ for folder in ["20", "21", "22", "23", "24","10","11","12","13","14"]:# ["20","2
         if os.path.isfile(file_path_force):
             df_force = pd.read_csv(file_path_force, delim_whitespace=True, header=None)
             df_force.columns = ["t"] + [
-                f"{wheel_id}_{force}" for wheel_id in [2, 1, 3, 4] for force in ["Id","Flong", "Flat", "Frad", "Mz"]
+                f"{wheel_id}_{force}" for wheel_id in [2, 1, 3, 4] for force in ["Id",r"$F_{long} [N]$", r"$F_{lat} [N]$", r"$F_{rad} [N]$", r"$M_z [Nm]$"]
             ]
             data_force[int(folder)] = df_force
             
@@ -199,13 +200,15 @@ for folder in ["20", "21", "22", "23", "24","10","11","12","13","14"]:# ["20","2
             
 if ( plot_1 ):
     # Plot (x, y)
+    reds = ['#FF0000', '#FF4D00', '#FF8000', '#FFB300', '#FFCC00']  # Red to orange shades
+    blues = ['#0000FF', '#0066CC', '#33CC99', '#66CC66', '#99FF33']  # Blue to green shades
     plt.figure(figsize=(10, 8))
     plt.rcParams.update({'font.size' : 14})
     for folder, df in data_q.items():
         limited_t_df = df[df['t'] <= 15]
-        color = "red"
-        if( int(folder) < 20) :
-            color = "blue"
+        color = reds[int(str(folder)[1])]
+        if int(folder) < 20:
+            color = blues[int(str(folder)[1])]
         if (int( folder) != 10 and int(folder) != 20):
             plt.plot(-limited_t_df["y"], limited_t_df["x"],color = color ,label=f'Folder {folder}')
     plt.text(50, 30, "100 [Nm]", fontsize=12, color='black')
@@ -214,17 +217,19 @@ if ( plot_1 ):
     plt.text(70, 60, "600 [Nm]", fontsize=12, color='black')
     plt.xlabel('y [m]', fontsize = 15)
     plt.ylabel('x [m]', fontsize = 15)
+    plt.xlim(0,150)
+    plt.ylim(0,150)
     plt.grid(True)
-    plt.savefig("x_y")
+    plt.savefig("x_y.pdf")
     plt.show()
 
     # Plot (x, t)
     plt.figure(figsize=(10, 8))
     for folder, df in data_q.items():
         lim_t_df = df[df['t'] <= 15]
-        color = "red"
-        if( int(folder) < 20) :
-            color = "blue"
+        color = reds[int(str(folder)[1])]
+        if int(folder) < 20:
+            color = blues[int(str(folder)[1])]
         plt.plot(lim_t_df["t"], lim_t_df["x"],color = color, label=f'Folder {folder}')
     plt.title('(x, t) Plot')
     plt.xlabel('Time (t)')
@@ -238,9 +243,9 @@ if ( plot_1 ):
     plt.figure(figsize=(10, 8))
     for folder, df in data_q.items():
         limi_t_df = df[df['t'] <= 15]
-        color = "red"
-        if( int(folder) < 20) :
-            color = "blue"
+        color = reds[int(str(folder)[1])]
+        if int(folder) < 20:
+            color = blues[int(str(folder)[1])]
         plt.plot(limi_t_df["t"], limi_t_df["y"], color = color,label=f'Folder {folder}')
     plt.title('(y, t) Plot')
     plt.xlabel('Time (t)')
@@ -254,11 +259,9 @@ if ( plot_1 ):
     plt.figure(figsize=(10, 8))
     plt.rcParams.update({'font.size' : 14})
     for folder, df in data_qd.items():
-        color = "red"
-        if( int(folder) < 20) :
-            color = "blue"
-        if (int(folder) == 10):
-            color = 'tab:cyan'
+        color = reds[int(str(folder)[1])]
+        if int(folder) < 20:
+            color = blues[int(str(folder)[1])]
         plt.plot(df["t"], df["speed"],color = color, label=f'Folder {folder}')
     plt.xlabel('Time [s]', fontsize = 15)
     plt.ylabel('Speed [m/s]', fontsize = 15)
@@ -269,12 +272,12 @@ if ( plot_1 ):
     plt.text(13,27, "600 [Nm]", fontsize=12, color='black')
     plt.text(2, 20, "800 [Nm]", fontsize=12, color='black')
     plt.grid(True)
-    plt.savefig("speed_time")
+    plt.savefig("speed_time.pdf")
     plt.show()
 
 if(plot_2):
     # Plot Forces for Wheels
-    force_types = ["Flong", "Flat", "Frad", "Mz"]
+    force_types =[r"$F_{long} [N]$", r"$F_{lat} [N]$", r"$F_{rad} [N]$", r"$M_z [Nm]$"]
     for force_type in force_types:
         fig, axs = plt.subplots(2, 2, figsize=(12, 10))
         fig.suptitle(f'{force_type} for All Wheels', fontsize=16)
@@ -293,20 +296,29 @@ if(plot_2):
         plt.tight_layout(rect=[0, 0, 1, 0.95])
         plt.show()
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
 if plot_3:    
     # Plot Forces for Wheels as a function of Speed (with decreasing speed discarded)
-    force_types = ["Flong", "Flat", "Frad", "Mz"]
+    force_types = [r"$F_{long} [N]$", r"$F_{lat} [N]$", r"$F_{rad} [N]$", r"$M_z [Nm]$"]
     # Define 5 red and 5 blue color variants
     reds = ['#FF0000', '#FF4D00', '#FF8000', '#FFB300', '#FFCC00']  # Red to orange shades
     blues = ['#0000FF', '#0066CC', '#33CC99', '#66CC66', '#99FF33']  # Blue to green shades
 
     for force_type in force_types:
+        
         fig, axs = plt.subplots(2, 2, figsize=(12, 10))
         fig2, axs2 = plt.subplots(2, 2, figsize=(12, 10))
-        fig3, axs3 = plt.subplots(2, 2, figsize=(12, 10))
-        fig.suptitle(f'{force_type} vs Speed for All Wheels (Speed Decreasing Discarded)', fontsize=16)
-        fig2.suptitle(f'{force_type} vs Speed for All Wheels essieu motorisé (top) essieu suiveur (bottom) (Speed Decreasing Discarded)', fontsize=16)
-        fig3.suptitle('f_tot' ,fontsize = 16)
+        #fig3, axs3 = plt.subplots(2, 2, figsize=(12, 10))
+        #fig.suptitle(f'{force_type} vs Speed for All Wheels (Speed Decreasing Discarded)', fontsize=16)
+        #fig2.suptitle(f'{force_type} vs Speed for All Wheels essieu motorisé (top) essieu suiveur (bottom) (Speed Decreasing Discarded)', fontsize=16)
+        #fig3.suptitle('f_tot', fontsize=16)
+
+        # Create a list to store the y-limits for comparison across all subplots
+        y_limits = []
+
         for folder, df in data_force.items():
             t = df["t"]
             # Merge with speed data from df_qd using the "t" column
@@ -330,13 +342,15 @@ if plot_3:
                 if int(folder) < 20:
                     color = blues[int(str(folder)[1])]
 
-                # Tracer la courbe principale
-                axs[row, col].plot(merged_df["speed"], merged_df[force_col], color=color, label=f'Folder {folder}')
-                axs[row, col].set_title(f'Wheel ID={wheel_id}')
-                axs[row, col].set_xlabel('Speed (m/s)')
+                # Plot the main force curve
+                axs[row, col].plot(merged_df["speed"], merged_df[force_col], color=color)
+                #axs[row, col].set_title(f'Wheel ID={wheel_id}')
+                axs[row, col].set_xlabel(r'Speed [m/s]')
                 axs[row, col].set_ylabel(force_type)
-                axs[row, col].legend()
                 axs[row, col].grid(True)
+                
+                # Store the y-limits to synchronize across all subplots
+                y_limits.append(axs[row, col].get_ylim())
 
             for i, wheel_id in enumerate([2, 1, 3, 4]):
                 force_col = f"{wheel_id}_{force_type}"
@@ -346,14 +360,16 @@ if plot_3:
                     color = blues[int(str(folder)[1])]
                     row, col = divmod(i - 2, 2)
 
-                # Tracer la courbe principale
-                axs2[row, col].plot(merged_df["speed"], merged_df[force_col], color=color, label=f'Folder {folder}')
-                axs2[row, col].set_title(f'Wheel ID={wheel_id}')
-                axs2[row, col].set_xlabel('Speed (m/s)')
+                # Plot the force curve for different wheel configurations
+                axs2[row, col].plot(merged_df["speed"], merged_df[force_col], color=color)
+                #axs2[row, col].set_title(f'Wheel ID={wheel_id}')
+                axs2[row, col].set_xlabel(r'Speed [m/s]')
                 axs2[row, col].set_ylabel(force_type)
-                axs2[row, col].legend()
                 axs2[row, col].grid(True)
                 
+                # Store the y-limits to synchronize across all subplots
+                y_limits.append(axs2[row, col].get_ylim())
+                """
             for i, wheel_id in enumerate([2, 1, 3, 4]):
                 force_col = f"{wheel_id}_Flong"
                 force_col2 = f'{wheel_id}_Flat'
@@ -363,16 +379,29 @@ if plot_3:
                     color = blues[int(str(folder)[1])]
                     row, col = divmod(i , 2)
 
-                # Tracer la courbe principale
-                axs3[row, col].plot(merged_df["speed"],np.sqrt( merged_df[force_col]*merged_df[force_col]+merged_df[force_col2]*merged_df[force_col2]), color=color, label=f'Folder {folder}')
+                # Plot combined force curve (f_tot)
+                axs3[row, col].plot(merged_df["speed"], np.sqrt(merged_df[force_col]*merged_df[force_col] + merged_df[force_col2]*merged_df[force_col2]), color=color)
                 axs3[row, col].set_title(f'Wheel ID={wheel_id}')
                 axs3[row, col].set_xlabel('Speed (m/s)')
                 axs3[row, col].set_ylabel(force_type)
-                axs3[row, col].legend()
                 axs3[row, col].grid(True)
-
+                
+                # Store the y-limits to synchronize across all subplots
+                y_limits.append(axs3[row, col].get_ylim())
+                """
+        # Find global y-limit to set across all subplots
+        min_y = min([ylim[0] for ylim in y_limits])
+        max_y = max([ylim[1] for ylim in y_limits])
+        
+        # Apply consistent y-limits across all subplots
+        for ax in [axs, axs2]:
+            for axis in ax.flatten():
+                axis.set_ylim(min_y, max_y)
+                
         plt.tight_layout(rect=[0, 0, 1, 0.95])
         plt.show()
+        fig.savefig(f"{force_type}_voiture_scale.pdf")
+        fig2.savefig(f"{force_type}_ess_scale.pdf")
 
 """
 if plot_3:    
@@ -492,39 +521,63 @@ if plot_3:
 
 
              
-if(plot_4):    
+if plot_4:    
     # Plot Forces for Wheels as a function of Speed (with decreasing speed discarded)
-        fig, axs = plt.subplots(2, 2, figsize=(12, 10))
-        fig.suptitle(f'Anlgis vs Speed for All Wheels (Speed Decreasing Discarded)', fontsize=16)
+    fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+    fig2, axs2 = plt.subplots(2, 2, figsize=(12, 10))
+    #fig.suptitle(f'Anglis vs Speed for All Wheels (Speed Decreasing Discarded)', fontsize=16)
+    reds = ['#FF0000', '#FF4D00', '#FF8000', '#FFB300', '#FFCC00']  # Red to orange shades
+    blues = ['#0000FF', '#0066CC', '#33CC99', '#66CC66', '#99FF33']  # Blue to green shades
+    y_limits = []
 
-        for folder, df in data_anglis.items():
-            t = df["t"]
-            # Merge with speed data from df_qd using the "t" column
-            df_qd_speed = data_qd[folder]
-            merged_df = pd.merge(df, df_qd_speed, on="t", how="left")
-            first_index_above_x = merged_df[merged_df['t'] > 2.2].index[0] if not df[df['t'] > 2.2].empty else None
-            merged_df = merged_df.iloc[first_index_above_x :].reset_index(drop=True)
-            
-            # Detect when the speed starts decreasing
-            speed = merged_df["speed"]
-            speed_derivative = speed.diff()  # First derivative of speed
-            first_decreasing_idx = speed_derivative[speed_derivative < 0].index.min()  # First index where speed decreases
-            
-            if not pd.isna(first_decreasing_idx):  # If a decrease is found
-                merged_df = merged_df.iloc[:first_decreasing_idx]  # Discard data after speed starts decreasing
+    for folder, df in data_anglis.items():
+        t = df["t"]
+        # Merge with speed data from df_qd using the "t" column
+        df_qd_speed = data_qd[folder]
+        merged_df = pd.merge(df, df_qd_speed, on="t", how="left")
+        first_index_above_x = merged_df[merged_df['t'] > 2.2].index[0] if not df[df['t'] > 2.2].empty else None
+        merged_df = merged_df.iloc[first_index_above_x:].reset_index(drop=True)
+        
+        # Detect when the speed starts decreasing
+        speed = merged_df["speed"]
+        speed_derivative = speed.diff()  # First derivative of speed
+        first_decreasing_idx = speed_derivative[speed_derivative < 0].index.min()  # First index where speed decreases
+        
+        if not pd.isna(first_decreasing_idx):  # If a decrease is found
+            merged_df = merged_df.iloc[:first_decreasing_idx]  # Discard data after speed starts decreasing
 
-            for i, wheel_id in enumerate([2, 1, 3, 4]):
-                anglis_col = f"{wheel_id}_anglis"
-                row, col = divmod(i, 2)
-                axs[row, col].plot(merged_df["speed"], merged_df[anglis_col], label=f'Folder {folder}')
-                axs[row, col].set_title(f'Wheel ID={wheel_id}')
-                axs[row, col].set_xlabel('Speed (m/s)')
-                axs[row, col].set_ylabel("Anglis (°)")
-                axs[row, col].legend()
-                axs[row, col].grid(True)
+        for i, wheel_id in enumerate([2, 1, 3, 4]):
+            anglis_col = f"{wheel_id}_anglis"
+            row, col = divmod(i, 2)  # Primary row/col assignment
+            color = reds[int(str(folder)[1])] if int(folder) >= 20 else blues[int(str(folder)[1])]
+            axs[row, col].plot(merged_df["speed"], merged_df[anglis_col] , label=f'Folder {folder}', color=color)
+            axs[row, col].set_xlabel('Speed [m/s]')
+            axs[row, col].set_ylabel("Anglis [rad]")
+            axs[row, col].grid(True)
+            y_limits.append(axs[row, col].get_ylim())
+        
+        # Additional for-loop to modify row/col mapping for specific configurations
+        for i, wheel_id in enumerate([2, 1, 3, 4]):
+            anglis_col = f"{wheel_id}_anglis"
+            row, col = divmod(i - 2, 2)  # Adjusted row/col for additional subplot arrangement
+            color = reds[int(str(folder)[1])] if int(folder) >= 20 else blues[int(str(folder)[1])]
+            axs2[row, col].plot(merged_df["speed"], merged_df[anglis_col], label=f'Folder {folder}', color=color)
+            axs2[row, col].grid(True)
+            axs2[row, col].set_xlabel('Speed [m/s]')
+            axs2[row, col].set_ylabel("Anglis [rad]")
+            y_limits.append(axs[row, col].get_ylim())
 
-        plt.tight_layout(rect=[0, 0, 1, 0.95])
-        plt.show()
+    min_y = min([ylim[0] for ylim in y_limits])
+    max_y = max([ylim[1] for ylim in y_limits])
+    for ax in [axs,axs2]:
+        for axis in ax.flatten():
+            axis.set_ylim(min_y, max_y)
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    fig.savefig("anglis_voit_rad_scale.pdf")
+    fig2.savefig("anglis_ess_rad_scale.pdf")
+    plt.show()
+
 
 if plot_5:
     # Create delta values for front and rear wheel differences
@@ -571,4 +624,65 @@ if plot_5:
     plt.legend()
     plt.grid(True)
     plt.show()
+    
+def calculate_curvature_radius(df):
+    t = df["t"].values
+    x = gaussian_filter1d(df["x"].values, sigma=10)  # Smooth x to reduce noise
+    y = gaussian_filter1d(df["y"].values, sigma=10)  # Smooth y to reduce noise
 
+    # Compute gradients (velocity components)
+    vx = np.gradient(x, t)  # dx/dt
+    vy = np.gradient(y, t)  # dy/dt
+    speed = np.sqrt(vx**2 + vy**2)  # Magnitude of velocity
+
+    # Compute second derivatives (acceleration components)
+    ax = np.gradient(vx, t)  # d²x/dt²
+    ay = np.gradient(vy, t)  # d²y/dt²
+
+    # Curvature calculation
+    numerator = np.abs(vx * ay - vy * ax)
+    denominator = speed**3
+    curvature = np.divide(numerator, denominator, out=np.zeros_like(numerator), where=denominator != 0)
+
+    # Radius of curvature
+    radius_of_curvature = np.divide(1, curvature, out=np.zeros_like(curvature), where=curvature != 0)
+
+    # Filter to only include values where t > 2.2
+    mask = t > 2.2
+    return speed[mask], radius_of_curvature[mask]
+
+    
+reds = ['#FF0000', '#FF4D00', '#FF8000', '#FFB300', '#FFCC00']  # Red to orange shades
+blues = ['#0000FF', '#0066CC', '#33CC99', '#66CC66', '#99FF33']  # Blue to green shades    
+
+plt.figure(figsize=(10, 8))
+for folder, df in data_q.items():
+    limited_t_df = df[df["t"] <= 15]  # Restrict to t <= 15 seconds
+    speed, radius = calculate_curvature_radius(limited_t_df)
+    
+    # Calculate speed difference and find the first decreasing index
+    speed_diff = np.diff(speed)
+    first_decreasing_idx = np.where(speed_diff < 0)[0][0] if np.any(speed_diff < 0) else len(speed)
+
+    # Slice both speed and radius to keep them aligned
+    speed = speed[:first_decreasing_idx]
+    radius = radius[:first_decreasing_idx]
+
+    # Determine color based on folder
+    if int(folder) < 20:
+        color = blues[int(str(folder)[1])]
+    else:
+        color = reds[int(str(folder)[1])]
+
+    # Plot speed vs. radius
+    plt.plot(speed, radius, color=color, label=f"Folder {folder}")
+
+# Add plot labels, title, and legend
+plt.xlabel("Speed [m/s]", fontsize=15)
+plt.ylabel("Radius of Curvature [m]", fontsize=15)
+plt.title("Radius of Curvature vs. Speed", fontsize=18)
+#plt.ylim(0, 200)  # Set limits for better visualization
+plt.grid(True)
+
+plt.savefig("curvature_radius_time")
+plt.show()
